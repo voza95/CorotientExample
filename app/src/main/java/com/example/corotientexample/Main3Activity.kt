@@ -3,12 +3,9 @@ package com.example.corotientexample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 
@@ -27,34 +24,23 @@ class Main3Activity : AppCompatActivity() {
     }
 
     private fun fakeApiRequest() {
-        val startTime = System.currentTimeMillis()
-        val parentJob = CoroutineScope(IO).launch {
-            val job1 = launch {
-                val time1 = measureTimeMillis {
-                    println("debug: launching job1 in thread: ${Thread.currentThread().name}")
-                    val result1 = getResult1FromApi()
-                    setTextOnMainThread("Got $result1")
+        CoroutineScope(IO).launch {
+            val executionTime = measureTimeMillis {
+            //When we use Async and Await we get to use Deferred type
+                val result1: Deferred<String> = async {
+                    print("debug: launching job1: ${Thread.currentThread().name}")
+                    getResult1FromApi()
                 }
-                println("debug: completed job1 in $time1 ms.")
-            }
-
-//            job1.join() //this will make job will be sequentially launching that will not launching in parallel
-
-
-            val job2 = launch {
-                val time2 = measureTimeMillis {
-                    println("debug: launching job2 in thread: ${Thread.currentThread().name}")
-                    val result2 = getResult2FromApi()
-                    setTextOnMainThread("Got $result2")
+                val result2: Deferred<String> = async {
+                    print("debug: launching job2: ${Thread.currentThread().name}")
+                    getResult2FromApi()
                 }
-                println("debug: completed job2 in $time2 ms.")
+
+                setTextOnMainThread("Got ${result1.await()}")
+                setTextOnMainThread("Got ${result2.await()}")
             }
-
+            println("debug: total time elapsed: $executionTime")
         }
-        parentJob.invokeOnCompletion {
-            println("debug: total elapsed time: ${System.currentTimeMillis() - startTime}")
-        }
-
     }
 
     private suspend fun setTextOnMainThread(input: String) {
