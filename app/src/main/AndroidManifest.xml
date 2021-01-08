@@ -10,9 +10,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CorotientExample">
 
+        <activity android:name=".ProgressActivity" />
         <activity android:name=".Main2Activity" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".ProgressActivity">
+        <activity android:name=".Main3Activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
